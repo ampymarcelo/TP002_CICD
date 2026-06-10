@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-11'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
+    agent any
 
     stages {
 
@@ -12,19 +7,19 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'Github-Credentials',
-                    url: 'https://github.com/ampymarcelo/TP_CI_CD_0011.git'
+                    url: 'https://github.com/ampymarcelo/TP002_CICD.git'
             }
         }
 
         stage('Build Application') {
             steps {
-                bat 'mvn clean install -DskipTests'
+                bat 'docker run --rm -v %CD%:/app -w /app maven:latest mvn clean install -DskipTests'
             }
         }
 
         stage('Unit Tests') {
             steps {
-                bat 'mvn test'
+                bat 'docker run --rm -v %CD%:/app -w /app maven:latest mvn test'
             }
         }
 
@@ -49,10 +44,10 @@ pipeline {
 
     post {
         success {
-            echo ' Pipeline terminé avec succès !'
+            echo '✅ Pipeline terminé avec succès !'
         }
         failure {
-            echo 'Pipeline échoué !'
+            echo '❌ Pipeline échoué !'
         }
     }
 }
