@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'Github-Credentials',
+                    url: 'https://github.com/ampymarcelo/TP_CI_CD_0011.git'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                bat 'mvn clean install -DskipTests'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t ampymarcelo/tp2-cicd:1.0.0 .'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'dockerhubpass',
+                    variable: 'dockerHubPass'
+                )]) {
+                    bat "docker login -u ampymarcelo -p %dockerHubPass%"
+                    bat 'docker push ampymarcelo/tp2-cicd:1.0.0'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline terminé avec succès !'
+        }
+        failure {
+            echo 'Pipeline échoué !'
+        }
+    }
+}
