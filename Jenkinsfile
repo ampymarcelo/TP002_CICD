@@ -13,13 +13,13 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                bat 'docker run --rm -v %CD%:/app -w /app maven:latest mvn clean install -DskipTests'
+                bat 'docker run --rm -v %CD%:/app -v %USERPROFILE%\\.m2:/root/.m2 -w /app maven:latest mvn clean install -DskipTests'
             }
         }
 
         stage('Unit Tests') {
             steps {
-                bat 'docker run --rm -v %CD%:/app -w /app maven:latest mvn test'
+                bat 'docker run --rm -v %CD%:/app -v %USERPROFILE%\\.m2:/root/.m2 -w /app maven:latest mvn test'
             }
         }
 
@@ -44,10 +44,10 @@ pipeline {
 
     post {
         success {
-            echo ' Pipeline terminé avec succès !'
+            echo 'Pipeline terminé avec succès !'
         }
         failure {
-            echo ' Pipeline échoué !'
+            echo 'Pipeline échoué !'
         }
     }
 }
